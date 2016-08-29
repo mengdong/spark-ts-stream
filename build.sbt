@@ -1,38 +1,47 @@
-name := "Sample TS Application" 
+// Your sbt build file. Guides on how to write one can be found at
+// http://www.scala-sbt.org/0.13/docs/index.html
 
-organization := "MapR Technologies" 
+spName := "com.maprps/simple-ts-stream"
 
-version := "1.0"
+organization := "com.maprps"
+
+version := "0.1.0"
+
+licenses := Seq("Apache-2.0" -> url("http://opensource.org/licenses/Apache-2.0"))
 
 scalaVersion := "2.11.7"
 
+crossScalaVersions := Seq("2.10.5", "2.11.7")
+
+sparkVersion := "1.6.1"
+
+sparkComponents ++= Seq("mllib", "sql", "core", "graphx", "streaming")
+
+spAppendScalaVersion := true
+
+spIncludeMaven := true
+
+spIgnoreProvided := true
+
+test in assembly := {}
+
+val testSparkVersion = settingKey[String]("The version of Spark to test against.")
+
+testSparkVersion := sys.props.getOrElse("spark.testVersion", sparkVersion.value)
+
+// Can't parallelly execute in test
+parallelExecution in Test := false
+
+fork in Test := true
+
+javaOptions ++= Seq("-Xmx2G", "-XX:MaxPermSize=256m")
+
 libraryDependencies ++= Seq(
-  // testing
-  "org.scalatest"   %% "scalatest"    % "2.2.4"   % "test,it",
-  "org.scalacheck"  %% "scalacheck"   % "1.12.2"      % "test,it",
-  // logging
-  "org.apache.logging.log4j" % "log4j-api" % "2.4.1",
-  "org.apache.logging.log4j" % "log4j-core" % "2.4.1",
-  // spark core
-  "org.apache.spark" % "spark-core_2.10" % "1.5.2",
-  "org.apache.spark" % "spark-graphx_2.10" % "1.5.2",
-  "org.apache.spark" % "spark-mllib_2.10" % "1.5.2",
-  "org.apache.spark" % "spark-streaming_2.10" % "1.5.2",
-  "org.apache.spark" % "spark-hive_2.10" % "1.5.2",
-  // spark packages
-  "com.databricks" % "spark-csv_2.10" % "1.3.0"
+		"junit" % "junit" % "4.12",
+		"org.scalatest" %% "scalatest" % "2.2.6" % "test",
+		"com.databricks" % "spark-csv_2.11" % "1.4.0"
 )
 
-//mainClass in (Compile, packageBin) := Some("com.mapr.tsapp.examples")
-
-scalacOptions ++= List("-feature","-deprecation", "-unchecked", "-Xlint")
-
-resolvers += "bintray-spark-packages" at
-  "https://dl.bintray.com/spark-packages/maven/" // allows us to include spark packages
-
-resolvers += "Typesafe Simple Repository" at
-  "http://repo.typesafe.com/typesafe/simple/maven-releases/"
-// Compiler settings. Use scalac -X for other options and their description.
-// See Here for more info http://www.scala-lang.org/files/archive/nightly/docs/manual/html/scalac.html
-scalacOptions ++= List("-feature","-deprecation", "-unchecked", "-Xlint")
-
+resolvers ++= Seq(
+		"mapr-repo" at "http://repository.mapr.com/maven"
+)

@@ -1,9 +1,11 @@
-resolvers += Classpaths.sbtPluginReleases
+// You may use this file to add plugin dependencies for sbt.
+resolvers += "bintray-spark-packages" at "https://dl.bintray.com/spark-packages/maven/"
 
-addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "3.0.0")
+resolvers += "sonatype-releases" at "https://oss.sonatype.org/content/repositories/releases/"
 
-addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.6.0")
+addSbtPlugin("org.spark-packages" %% "sbt-spark-package" % "0.2.3")
 
-addSbtPlugin("org.scoverage" %% "sbt-scoverage" % "1.0.4")
+addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "0.8.0")
 
-addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "0.6.0")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.1.0")
+

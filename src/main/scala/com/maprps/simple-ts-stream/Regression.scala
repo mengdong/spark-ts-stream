@@ -1,4 +1,4 @@
-//package com.mapr.tsapp.examples
+package com.maprps.simple-ts-stream
 
 import org.apache.log4j.{Logger, Level}
 //core and SparkSQL
