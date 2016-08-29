@@ -39,7 +39,8 @@ javaOptions ++= Seq("-Xmx2G", "-XX:MaxPermSize=256m")
 libraryDependencies ++= Seq(
 		"junit" % "junit" % "4.12",
 		"org.scalatest" %% "scalatest" % "2.2.6" % "test",
-		"com.databricks" % "spark-csv_2.11" % "1.4.0"
+		"com.databricks" % "spark-csv_2.11" % "1.4.0",
+        "com.github.scopt" % "scopt_2.10" % "3.3.0"
 )
 
 resolvers ++= Seq(
