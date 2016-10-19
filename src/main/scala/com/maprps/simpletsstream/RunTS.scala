@@ -77,7 +77,7 @@ object RunTS extends Serializable {
                     }
                     tsdbMetrics.toList
                 } ).mapPartitions(OpenTSDB.toTSDB)
-                printf(rdd.take(1))
+                printf(rdd.take(1).mkString(","))
             } )
 /*
         val numFeatures = 16
