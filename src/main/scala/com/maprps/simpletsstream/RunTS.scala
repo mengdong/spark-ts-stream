@@ -76,7 +76,7 @@ object RunTS extends Serializable {
                             toDouble * 100 + 1476868264).toInt.toString +" " + parts(i) +" sensor1"
                     }
                     tsdbMetrics.toList
-                } ).mapPartitions(OpenTSDB.toTSDB)
+                } ).mapPartitions(OpenTSDB.toTSDB).collect
                 printf(rdd.take(1).mkString(","))
             } )
 /*
