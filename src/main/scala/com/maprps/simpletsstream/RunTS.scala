@@ -45,7 +45,7 @@ object RunTS extends Serializable {
         val ssc = new StreamingContext(sc, Seconds(60))
         ssc.checkpoint("maprfs:///checkpoint/.")
 
-        val trainingData = ssc.textFileStream("maprfs:///data").map( s => {
+        val trainingData = ssc.textFileStream("maprfs:///user/mapr/train").map( s => {
         // val trainingData = sc.textFile("maprfs:///data").map( s => {
             val parts = s.split(',')
             val l = parts.length
@@ -53,7 +53,7 @@ object RunTS extends Serializable {
             val features = Vectors.dense(parts.slice(1,l).map(java.lang.Double.parseDouble))
             LabeledPoint(label, features)
         }).cache()
-        val testData = ssc.textFileStream("maprfs:///test").map( s => {
+        val testData = ssc.textFileStream("maprfs:///user/mapr/test").map( s => {
             val parts = s.split(',')
             val l = parts.length
             val label = java.lang.Double.parseDouble(parts(0))
