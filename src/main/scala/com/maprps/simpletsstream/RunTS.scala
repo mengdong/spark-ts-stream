@@ -88,7 +88,7 @@ object RunTS extends Serializable {
 
         val messages = KafkaUtils.createDirectStream(ssc, kafkaParams, topicSet)
         // val trainingDataToTSDB = ssc.textFileStream("maprfs:///user/mapr/train")
-            .foreachRDD( rdd => {
+        messages.foreachRDD( rdd => {
             /*
                 rdd.flatMap( s => {
                     val parts = s.split(',')
