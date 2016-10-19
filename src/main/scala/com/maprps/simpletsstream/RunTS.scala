@@ -66,7 +66,7 @@ object RunTS extends Serializable {
         })
 */
         val trainingDataToTSDB = ssc.textFileStream("maprfs:///user/mapr/train")
-            .flatMap( s => {
+            .foreachRDD( rdd => rdd.flatMap( s => {
                 val parts = s.split(',')
                 val l = parts.length
                 var tsdbMetrics = new ListBuffer[String]()
@@ -75,8 +75,7 @@ object RunTS extends Serializable {
                         toDouble * 100 + 1476868264).toInt.toString +" " + parts(i) +" sensor1"
                 }
                 tsdbMetrics.toList
-            })
-            .mapPartitions(OpenTSDB.toTSDB)
+            } ).mapPartitions(OpenTSDB.toTSDB) )
 /*
         val numFeatures = 16
         val model = new StreamingLinearRegressionWithSGD()
