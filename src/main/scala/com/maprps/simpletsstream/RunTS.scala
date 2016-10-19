@@ -7,9 +7,11 @@ import scala.collection.mutable.ListBuffer
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.streaming._
-// import org.apache.spark.streaming.kafka._
+import org.apache.spark.streaming.kafka._
 import org.apache.spark.mllib.regression.{LabeledPoint, StreamingLinearRegressionWithSGD}
 import org.apache.spark.mllib.linalg.Vectors
+import org.apache.kafka.clients.consumer.ConsumerConfig
+
 
 object RunTS extends Serializable {
 
@@ -46,7 +48,7 @@ object RunTS extends Serializable {
         val tsSchema = List( "ethylene", "r1", "r2", "r3", "r4",
             "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12",
             "r13", "r14", "r15", "r16")
-        val ssc = new StreamingContext(sc, Seconds(60))
+        val ssc = new StreamingContext(sc, Seconds(2))
         ssc.checkpoint("maprfs:///checkpoint/.")
 /*
         val trainingData = ssc.textFileStream("maprfs:///user/mapr/train").map( s => {
@@ -65,8 +67,29 @@ object RunTS extends Serializable {
             LabeledPoint(label, features)
         })
 */
-        val trainingDataToTSDB = ssc.textFileStream("maprfs:///user/mapr/train")
+        val brokers = "maprdemo:9092" // not needed for MapR Streams, needed for Kafka
+        val groupId = "testgroup"
+        val offsetReset = "earliest"
+        val pollTimeout = "1000"
+        val topics = "/sample-stream/sensor1-region1"
+        val topicSet = topics.split(",").toSet
+
+        val kafkaParams = Map[String, String](
+            ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG -> brokers,
+            ConsumerConfig.GROUP_ID_CONFIG -> groupId,
+            ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG ->
+                "org.apache.kafka.common.serialization.StringDeserializer",
+            ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG ->
+                "org.apache.kafka.common.serialization.StringDeserializer",
+            ConsumerConfig.AUTO_OFFSET_RESET_CONFIG -> offsetReset,
+            ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG -> "false",
+            "spark.kafka.poll.time" -> pollTimeout
+        )
+
+        val messages = KafkaUtils.createDirectStream(ssc, kafkaParams, topicSet)
+        // val trainingDataToTSDB = ssc.textFileStream("maprfs:///user/mapr/train")
             .foreachRDD( rdd => {
+            /*
                 rdd.flatMap( s => {
                     val parts = s.split(',')
                     val l = parts.length
@@ -77,6 +100,7 @@ object RunTS extends Serializable {
                     }
                     tsdbMetrics.toList
                 } ).mapPartitions(OpenTSDB.toTSDB).collect
+             */
                 printf(rdd.take(1).mkString(","))
             } )
 /*
@@ -91,13 +115,7 @@ object RunTS extends Serializable {
         ssc.awaitTermination()
 
         ssc.stop()
-        /*
-        val topicSet = Set("test")
-        val brokers = "localhost:9092"
-        val kafkaParams = Map[String, String]("metadata.broker.list" -> brokers)
-        val messages = KafkaUtils.createDirectStream(ssc, kafkaParams, topicSet)
-        */
-    }
+   }
 }
 
         
