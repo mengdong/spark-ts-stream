@@ -69,8 +69,8 @@ object OpenTSDB {
             printf(getResponseMessage(response.getStatus().toInt))
             printf("------------------------------------------------")
 
-            failCount += message.substring(message.indexOfSlice("failed") +8,
-                message.indexOfSlice("success") -2).toInt
+//            failCount += message.substring(message.indexOfSlice("failed") +8,
+//                message.indexOfSlice("success") -2).toInt
             res = List[JsonAST.JObject]()
             roundRobinIter += 1
             response.close()
@@ -78,7 +78,7 @@ object OpenTSDB {
         restClient.destroy()
         printf("++++++++++++++++++++++++++++++++++++++++++++++++")
         printf("++++++++++++++++++++++++++++++++++++++++++++++++")
-        printf(s"the number of records failed is $failCount")
+//        printf(s"the number of records failed is $failCount")
         printf("++++++++++++++++++++++++++++++++++++++++++++++++")
         printf("++++++++++++++++++++++++++++++++++++++++++++++++")
         iter
