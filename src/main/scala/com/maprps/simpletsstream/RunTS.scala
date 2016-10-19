@@ -73,7 +73,7 @@ object RunTS extends Serializable {
                     var tsdbMetrics = new ListBuffer[String]()
                     for ( i <- 1 to l-1) {
                         tsdbMetrics += tsSchema(i-1) +" " +(parts(0).
-                            toDouble * 100 + 1476868264).toInt.toString +" " + parts(i) +" sensor1"
+                            toDouble * 100 + 1476868264).toInt.toString +" " + parts(i) +" sensor1 region1"
                     }
                     tsdbMetrics.toList
                 } ).mapPartitions(OpenTSDB.toTSDB).collect
