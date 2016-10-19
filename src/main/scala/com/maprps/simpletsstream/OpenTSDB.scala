@@ -37,9 +37,9 @@ object OpenTSDB {
                 if (iter.hasNext) {
                     val cur = iter.next
                     val splitCur = cur.split(" ")
-                    val tags = splitCur.slice(3,splitCur.length)
-                    val tagsArray = for (x<-tags) yield x.toString.split("=")
-                    val tagsTuple = for (x<-tagsArray) yield (x(0),x(1))
+                    val tags = splitCur.slice(3, splitCur.length)
+                    val tagsArray = for (x <- tags) yield x.toString.split("=")
+                    val tagsTuple = for (x <- tagsArray) yield (x(0), x(1))
                     val json = ("metric" -> splitCur(0)) ~
                         ("timestamp" -> splitCur(1)) ~
                         ("value" -> splitCur(2)) ~
@@ -69,7 +69,8 @@ object OpenTSDB {
             printf(getResponseMessage(response.getStatus().toInt))
             printf("------------------------------------------------")
 
-            failCount += message.substring(message.indexOfSlice("failed")+8, message.indexOfSlice("success") - 2).toInt
+            failCount += message.substring(message.indexOfSlice("failed") +8,
+                message.indexOfSlice("success") -2).toInt
             res = List[JsonAST.JObject]()
             roundRobinIter += 1
             response.close()
