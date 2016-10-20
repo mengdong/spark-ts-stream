@@ -95,8 +95,8 @@ object RunTS extends Serializable {
                     val l = parts.length
                     var tsdbMetrics = new ListBuffer[String]()
                     for ( i <- 1 to l-1) {
-                        tsdbMetrics += tsSchema(i-1) +" " +(parts(0).toDouble * 100 + timeStamp )
-                            .toInt.toString +" " + parts(i) +" SENSOR=sensor1 REGION=region1"
+                        tsdbMetrics += tsSchema(i-1) +" " +(parts(0).toDouble * 1000 + timeStamp )
+                            .toLong.toString +" " + parts(i) +" SENSOR=sensor1 REGION=region1"
                     }
                     tsdbMetrics.toList
                 } ).mapPartitions(OpenTSDB.toTSDB).collect
