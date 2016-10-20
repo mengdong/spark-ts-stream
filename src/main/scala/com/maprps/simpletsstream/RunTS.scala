@@ -86,7 +86,7 @@ object RunTS extends Serializable {
             "spark.kafka.poll.time" -> pollTimeout
         )
 
-        val messages = KafkaUtils.createDirectStream(ssc, kafkaParams, topicSet)
+        val messages = KafkaUtils.createDirectStream(ssc, kafkaParams, topicSet).map(_._2)
         // val trainingDataToTSDB = ssc.textFileStream("maprfs:///user/mapr/train")
         messages.foreachRDD( rdd => {
             /*
