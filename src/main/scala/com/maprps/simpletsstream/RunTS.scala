@@ -71,7 +71,7 @@ object RunTS extends Serializable {
         val groupId = "testgroup"
         val offsetReset = "earliest"
         val pollTimeout = "1000"
-        val topics = "/sample-stream/sensor1-region1"
+        val topics = "/sample-stream:sensor1-region1"
         val topicSet = topics.split(",").toSet
 
         val kafkaParams = Map[String, String](
