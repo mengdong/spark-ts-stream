@@ -85,7 +85,7 @@ object RunTS extends Serializable {
             ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG -> "false",
             "spark.kafka.poll.time" -> pollTimeout
         )
-        val timeStamp = System.currentTimeMillis - 4179019
+        val timeStamp = System.currentTimeMillis
         val lines = KafkaUtils.createDirectStream[String, String](ssc,
             kafkaParams, topicSet).map(_._2)
         // val trainingDataToTSDB = ssc.textFileStream("maprfs:///user/mapr/train")
@@ -95,7 +95,7 @@ object RunTS extends Serializable {
                     val l = parts.length
                     var tsdbMetrics = new ListBuffer[String]()
                     for ( i <- 1 to l-1) {
-                        tsdbMetrics += tsSchema(i-1) +" " +(parts(0).toDouble * 100 + )
+                        tsdbMetrics += tsSchema(i-1) +" " +(parts(0).toDouble * 100 + timeStamp )
                             .toInt.toString +" " + parts(i) +" SENSOR=sensor1 REGION=region1"
                     }
                     tsdbMetrics.toList
