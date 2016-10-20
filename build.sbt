@@ -15,7 +15,7 @@ crossScalaVersions := Seq("2.10.5", "2.11.7")
 
 sparkVersion := "1.6.1-mapr-1609"
 
-sparkComponents ++= Seq("mllib", "sql", "core", "graphx", "streaming", "streaming-kafka")
+sparkComponents ++= Seq("mllib", "sql", "core", "graphx", "streaming", "streaming-kafka-v09")
 
 spAppendScalaVersion := true
 
