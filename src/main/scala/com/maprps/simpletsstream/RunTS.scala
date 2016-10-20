@@ -90,7 +90,6 @@ object RunTS extends Serializable {
             kafkaParams, topicSet).map(_._2)
         // val trainingDataToTSDB = ssc.textFileStream("maprfs:///user/mapr/train")
         lines.foreachRDD( rdd => {
-            /*
                 rdd.flatMap( s => {
                     val parts = s.split(',')
                     val l = parts.length
@@ -101,8 +100,9 @@ object RunTS extends Serializable {
                     }
                     tsdbMetrics.toList
                 } ).mapPartitions(OpenTSDB.toTSDB).collect
-             */
-                printf(rdd.take(1).mkString(","))
+                printf("------------------------")
+                printf(rdd.take(1).mkString(",") + "/n")
+                printf("------------------------")
             } )
 /*
         val numFeatures = 16
