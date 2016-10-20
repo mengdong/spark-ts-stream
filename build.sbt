@@ -13,7 +13,7 @@ scalaVersion := "2.10.5"
 
 crossScalaVersions := Seq("2.10.5", "2.11.7")
 
-sparkVersion := "1.6.1"
+sparkVersion := "1.6.1-mapr-1609"
 
 sparkComponents ++= Seq("mllib", "sql", "core", "graphx", "streaming", "streaming-kafka")
 
@@ -30,7 +30,7 @@ val testSparkVersion = settingKey[String]("The version of Spark to test against.
 testSparkVersion := sys.props.getOrElse("spark.testVersion", sparkVersion.value)
 
 val hbaseVersion = "1.1.1-mapr-1602"
-val hadoopVersion = "2.7.0-mapr-1602"
+val hadoopVersion = "2.7.0-mapr-1607"
 
 // Can't parallelly execute in test
 parallelExecution in Test := false
