@@ -9,11 +9,11 @@ version := "0.1.0"
 
 licenses := Seq("Apache-2.0" -> url("http://opensource.org/licenses/Apache-2.0"))
 
-scalaVersion := "2.10.5"
+scalaVersion := "2.11.7"
 
 crossScalaVersions := Seq("2.10.5", "2.11.7")
 
-sparkVersion := "1.6.1-mapr-1609"
+sparkVersion := "2.0.1-mapr-1611"
 
 sparkComponents ++= Seq("mllib", "sql", "core", "graphx", "streaming", "streaming-kafka-v09")
 
@@ -40,9 +40,9 @@ fork in Test := true
 javaOptions ++= Seq("-Xmx2G", "-XX:MaxPermSize=512m")
 
 libraryDependencies ++= Seq(
-		"com.databricks" % "spark-csv_2.10" % "1.5.0",
+		"com.databricks" % "spark-csv_2.11" % "1.5.0",
         "com.github.scopt" %% "scopt" % "3.5.0",
-        "org.apache.kafka" % "kafka_2.10" % "0.9.0.0",
+        "org.apache.kafka" % "kafka_2.11" % "0.9.0.0",
         "org.apache.hbase" % "hbase-common" % hbaseVersion % "provided",
         "org.apache.hbase" % "hbase-client" % hbaseVersion % "provided",
         "org.apache.hbase" % "hbase-server" % hbaseVersion % "provided",

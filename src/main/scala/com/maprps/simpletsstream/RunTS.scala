@@ -9,7 +9,6 @@ import org.apache.spark.SparkContext
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.kafka.v09.KafkaUtils
 import org.apache.spark.mllib.regression.{LabeledPoint, StreamingLinearRegressionWithSGD}
-import org.apache.spark.mllib.linalg.Vectors
 import org.apache.kafka.clients.consumer.ConsumerConfig
 
 
