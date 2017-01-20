@@ -9,13 +9,13 @@ version := "0.1.0"
 
 licenses := Seq("Apache-2.0" -> url("http://opensource.org/licenses/Apache-2.0"))
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 
-crossScalaVersions := Seq("2.10.5", "2.11.7")
+crossScalaVersions := Seq("2.10.5", "2.11.8")
 
 sparkVersion := "2.0.1-mapr-1611"
 
-sparkComponents ++= Seq("mllib", "sql", "core", "graphx", "streaming", "streaming-kafka-v09")
+sparkComponents ++= Seq("mllib", "sql", "core", "graphx", "streaming", "streaming-kafka-0-9")
 
 spAppendScalaVersion := true
 
