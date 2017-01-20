@@ -7,7 +7,7 @@ import scala.collection.mutable.ListBuffer
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.streaming._
-import org.apache.spark.streaming.kafka.v09.KafkaUtils
+import org.apache.spark.streaming.kafka09.{ ConsumerStrategies, KafkaUtils, LocationStrategies }
 import org.apache.spark.mllib.regression.{LabeledPoint, StreamingLinearRegressionWithSGD}
 import org.apache.kafka.clients.consumer.ConsumerConfig
 
@@ -84,9 +84,10 @@ object RunTS extends Serializable {
             ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG -> "false",
             "spark.kafka.poll.time" -> pollTimeout
         )
+        val consumerStrategy = ConsumerStrategies.Subscribe[String, String](topicSet, kafkaParams)
         val timeStamp = System.currentTimeMillis
         val lines = KafkaUtils.createDirectStream[String, String](ssc,
-            kafkaParams, topicSet).map(_._2)
+            LocationStrategies.PreferConsistent, consumerStrategy).map(_.value())
         // val trainingDataToTSDB = ssc.textFileStream("maprfs:///user/mapr/train")
         lines.foreachRDD( rdd => {
                 rdd.flatMap( s => {
