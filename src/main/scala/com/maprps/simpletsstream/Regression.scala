@@ -1,193 +1,102 @@
 package com.maprps.simpletsstream
 
-import org.apache.log4j.{Logger, Level}
-//core and SparkSQL
-import org.apache.spark.sql.DataFrame
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.sql.types.{StructType, StructField, StringType, TimestampType}
-// ML Feature Creation, Tuning, Models, and Model Evaluation
-import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler, OneHotEncoder}
-import org.apache.spark.ml.tuning.{ParamGridBuilder, TrainValidationSplit, TrainValidationSplitModel}
-import org.apache.spark.ml.evaluation.RegressionEvaluator
-import org.apache.spark.ml.regression.{RandomForestRegressor, LinearRegression, GBTRegressor}
-import org.apache.spark.ml.Pipeline
-import org.apache.spark.mllib.evaluation.RegressionMetrics
+import org.apache.log4j.{Level, Logger}
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.ml.regression.LinearRegression
+import org.apache.spark.ml.feature.VectorAssembler
+import scopt.OptionParser
 
 object Regression{
-        /*
-	val storeEncoder = new OneHotEncoder()
-	.setInputCol("Store")
-	.setOutputCol("StoreVec")
-	val stateHolidayIndexer = new StringIndexer()
-	.setInputCol("StateHoliday")
-	.setOutputCol("StateHolidayIndex")
-	val stateHolidayEncoder = new OneHotEncoder()
-	.setInputCol("StateHolidayIndex")
-	.setOutputCol("StateHolidayVec")
-	val schoolHolidayIndexer = new StringIndexer()
-	.setInputCol("SchoolHoliday")
-	.setOutputCol("SchoolHolidayIndex")
-	val schoolHolidayEncoder = new OneHotEncoder()
-	.setInputCol("SchoolHolidayIndex")
-	.setOutputCol("SchoolHolidayVec")
-	val dayOfMonthEncoder = new OneHotEncoder()
-	.setInputCol("DayOfMonth")
-	.setOutputCol("DayOfMonthVec")
-	val dayOfWeekEncoder = new OneHotEncoder()
-	.setInputCol("DayOfWeek")
-	.setOutputCol("DayOfWeekVec")
-	val monthEncoder = new OneHotEncoder()
-	.setInputCol("Month")
-	.setOutputCol("MonthVec")
-	val quarterEncoder = new OneHotEncoder()
-	.setInputCol("Quarter")
-	.setOutputCol("QuarterVec")
-	val yearEncoder = new OneHotEncoder()
-	.setInputCol("Year")
-	.setOutputCol("YearVec")
-	val storeTypeIndexer = new StringIndexer()
-	.setInputCol("StoreType")
-	.setOutputCol("StoreTypeIndex")
-	val storeTypeEncoder = new OneHotEncoder()
-	.setInputCol("StoreTypeIndex")
-	.setOutputCol("StoreTypeVec")
-	val assortmentIndexer = new StringIndexer()
-	.setInputCol("Assortment")
-	.setOutputCol("AssortmentIndex")
-	val assortmentEncoder = new OneHotEncoder()
-	.setInputCol("AssortmentIndex")
-	.setOutputCol("AssortmentVec")
-	val competitionOpenSinceMonthEncoder = new OneHotEncoder()
-	.setInputCol("CompetitionOpenSinceMonth")
-	.setOutputCol("CompetitionOpenSinceMonthVec")
-	val competitionOpenSinceYearEncoder = new OneHotEncoder()
-	.setInputCol("CompetitionOpenSinceYear")
-	.setOutputCol("CompetitionOpenSinceYearVec")
-	val promoIntervalIndexer = new StringIndexer()
-	.setInputCol("PromoInterval")
-	.setOutputCol("PromoIntervalIndex")
-	val promoIntervalEncoder = new OneHotEncoder()
-	.setInputCol("PromoIntervalIndex")
-	.setOutputCol("PromoIntervalVec")
+
+    case class runParams (train: String = null, resultPath: String = null)
 
 	val assembler = new VectorAssembler()
-	.setInputCols(Array("StoreVec", "Open", "Promo", "StateHolidayVec", "SchoolHolidayVec",
-		"DayOfWeekVec", "DayOfMonthVec", // "MonthVec", "QuarterVec", "YearVec",
-		"StoreTypeVec", "AssortmentVec", "CompetitionDistance","CompetitionOpenSinceMonthVec",
-		"CompetitionOpenSinceYearVec",  // "Promo2", "Promo2SinceWeek", "Promo2SinceYear",
-		"PromoIntervalVec", "monthlyAvgSales", "monthlyMedSales"))
-	.setOutputCol("features")
+		.setInputCols(Array("r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9",
+			"r10", "r11", "r12", "r13", "r14", "r15", "r16", "ethylene",
+			"vr1", "vr2", "vr3", "vr4", "vr5", "vr6", "vr7", "vr8", "vr9", "vr10",
+			"vr11", "vr12", "vr13", "vr14", "vr15", "vr16", "vethylene",
+			"ar1", "ar2", "ar3", "ar4", "ar5", "ar6", "ar7", "ar8", "ar9", "ar10",
+			"ar11", "ar12", "ar13", "ar14", "ar15", "ar16", "aethylene"
+		))
+		.setOutputCol("features")
 
-	def preprocessRFPipeline() : TrainValidationSplit = {
-		val rf = new RandomForestRegressor()
-		val paramGrid = new ParamGridBuilder()
-			.addGrid(rf.minInstancesPerNode, Array(5))
-			.addGrid(rf.maxDepth, Array(8))
-			.addGrid(rf.numTrees, Array(20))
-			.addGrid(rf.subsamplingRate, Array(0.9))
-			.build()
+    def main(args: Array[String]): Unit = {
+        Logger.getLogger("org").setLevel(Level.WARN)
+        Logger.getLogger("akka").setLevel(Level.WARN)
 
-		val pipeline = new Pipeline()
-			.setStages(Array(storeEncoder, stateHolidayIndexer, schoolHolidayIndexer,
-			stateHolidayEncoder, schoolHolidayEncoder, dayOfWeekEncoder, dayOfMonthEncoder,
-			storeTypeIndexer, storeTypeEncoder,
-			assortmentIndexer, assortmentEncoder, competitionOpenSinceMonthEncoder,
-			competitionOpenSinceYearEncoder, promoIntervalIndexer, promoIntervalEncoder,
-			assembler, rf))
+        val spark = SparkSession.builder()
+			.appName("TrainPMML")
+			.master("local")
+		    .getOrCreate()
+        val defaultParam = new runParams()
+        val parser = new OptionParser[runParams](this.getClass.getSimpleName) {
+            head(s"${this.getClass.getSimpleName}: Run simple app")
+            opt[String]("train")
+                .text("location of the training data")
+                .action((x, c) => c.copy(train = x))
+                .required()
+			opt[String]("resultPath")
+			    .text("location of the model")
+			    .action((x, c) => c.copy(resultPath = x))
+			    .required()
+        }
+        parser.parse(args, defaultParam).map { params =>
+            run(spark, params.train, params.resultPath)
+        } getOrElse {
+            sys.exit(1)
+        }
+    }
 
-		val cv = new TrainValidationSplit()
-			.setEstimator(pipeline)
-			.setEvaluator(new RegressionEvaluator)
-			.setEstimatorParamMaps(paramGrid)
-			.setTrainRatio(0.7)
-		cv
+    def run(spark: SparkSession, train: String, resultPath: String): Unit = {
+		val data = spark.read.option("header", "true").option("inferSchema", "true")
+			.format("com.databricks.spark.csv").load(train)
+		data.createOrReplaceTempView("train")
+		val df = spark.sql(
+			"""select t2.ethylene as label, t1.r1, t1.r2, t1.r3, t1.r4,
+            |t1.r5, t1.r6, t1.r7, t1.r8, t1.r9, t1.r10, t1.r11, t1.r12,
+			|t1.r13, t1.r14, t1.r15, t1.r16, t1.ethylene,
+			|t3.vr1, t3.vr2, t3.vr3, t3.vr4, t3.vr5, t3.vr6, t3.vr7,
+            |t3.vr8, t3.vr9, t3.vr10, t3.vr11, t3.vr12,
+	  |t3.vr13, t3.vr14, t3.vr15, t3.vr16, t3.vethylene,
+      |t3.ar1, t3.ar2, t3.ar3, t3.ar4, t3.ar5, t3.ar6, t3.ar7,
+      |t3.ar8, t3.ar9, t3.ar10, t3.ar11, t3.ar12,
+	  |t3.ar13, t3.ar14, t3.ar15, t3.ar16, t3.aethylene
+      |from train t1 inner join (
+      |		select ts+60 as ts_future, ethylene
+      |  	from train
+      |) t2 on (t1.ts = t2.ts_future)
+      |inner join (
+      |		select floor(ts/5) as interval, variance(r1) as vr1, avg(r1) as ar1,
+      |     variance(r2) as vr2, avg(r2) as ar2,
+      |     variance(r3) as vr3, avg(r3) as ar3,
+      |     variance(r4) as vr4, avg(r4) as ar4,
+      |     variance(r5) as vr5, avg(r5) as ar5,
+      |     variance(r6) as vr6, avg(r6) as ar6,
+      |     variance(r7) as vr7, avg(r7) as ar7,
+      |     variance(r8) as vr8, avg(r8) as ar8,
+      |     variance(r9) as vr9, avg(r9) as ar9,
+      |     variance(r10) as vr10, avg(r10) as ar10,
+	  |     variance(r11) as vr11, avg(r11) as ar11,
+	  |     variance(r12) as vr12, avg(r12) as ar12,
+	  |     variance(r13) as vr13, avg(r13) as ar13,
+	  |     variance(r14) as vr14, avg(r14) as ar14,
+	  |     variance(r15) as vr15, avg(r15) as ar15,
+	  |     variance(r16) as vr16, avg(r16) as ar16,
+      |     variance(ethylene) as vethylene, avg(ethylene) as aethylene
+      |  	from train
+      |   	group by floor(ts/5)
+      |) t3 on (floor(t1.ts/5) = t3.interval)
+    """.stripMargin
+		)
+
+		val lr = new LinearRegression()
+			.setMaxIter(10)
+			.setRegParam(0.3)
+			.setElasticNetParam(0.8)
+		val output = assembler.transform(df).select("features", "label").cache()
+		val lrModel = lr.fit(output)
+		lrModel.save(resultPath)
+		printf(s"saving result to $resultPath")
 	}
 
-	def fitModel(cv: TrainValidationSplit, data: DataFrame): TrainValidationSplitModel = {
-
-		val Array(train, test) = data.randomSplit(Array(0.9, 0.1), seed = 2016)
-    	printf("Fitting data")
-	    train.repartition(24).cache()
-	    // test.cache()
-	    val model = cv.fit(train)
-	    printf("Now performing test on hold out set")
-	    val holdout = model.transform(test).select("prediction","label")
-
-        // have to do a type conversion for RegressionMetrics
-	val rm = new RegressionMetrics(holdout.rdd.map(x =>
-		(x(0).asInstanceOf[Double], x(1).asInstanceOf[Double])))
-
-	println("-------Test Metrics----------")
-	println("--Test Explained Variance:---")
-	println(rm.explainedVariance)
-	println("------Test R^2 Coef:---------")
-	println(rm.r2)
-	println("------Test MSE:--------------")
-	println(rm.meanSquaredError)
-	println("------Test RMSE:-------------")
-	println(rm.rootMeanSquaredError)
-
-	model
-	}
-
-	def trainModel(sqlContext:HiveContext):TrainValidationSplitModel = {
-	val data = readTrain(sqlContext)
-	// The linear Regression Pipeline
-	val rfCv = preprocessRFPipeline()
-	println("-----evaluating random forest---------")
-	val rfModel = fitModel(rfCv, data)
-	rfModel
-	}
-
-	def main(args:Array[String]) = {
-	val WINDOW_LENGTH = new Duration(28 * 1000)
-	val SLIDE_INTERVAL = new Duration(1 * 1000)
-	val name = "TS Regression Application"
-	println(s"Starting up $name")
-
-	Logger.getLogger("org").setLevel(Level.WARN)
-	Logger.getLogger("akka").setLevel(Level.WARN)
-
-	val conf = new SparkConf().setAppName(name)
-	val sc = new SparkContext(conf)
-	val sqlContext = new HiveContext(sc)
-	// sc.setLogLevel("INFO")
-	println("--------Set Up Complete-----------")
-	val rfModel = trainModel(sqlContext)
-
-	println("Generating TS predictions")
-
-	val sscFeature = new StreamingContext(sc, Seconds(1))
-	val lines = ssc.socketTextStream("localhost", 9999)
-
-	//val lines = sc.textfile("rossmann/testSplit.csv")
-	val streamSchema = StructType(Seq(StructField("Store", StringType, true),
-	StructField("DayOfWeek", StringType, true), StructField("Date", StringType, true),
-	StructField("Sales", String, true), StructField("Customers", String, true),
-	StructField("Open", String, true), StructField("Promo", String, true),
-	StructField(" StateHoliday", String, true), StructField("SchoolHoliday", String, true)))
-
-	val fieldStream = lines.flatMap(_.split(",")).cache()
-	val windowTestStream = fieldStream.window(WINDOW_LENGTH, SLIDE_INTERVAL)
-	windowTestStream.foreachRDD(block => {
-		if (block.count()==0){
-		println("No test data received in this time interval")
-		} else {
-		val blockDataframe = sqlContext.createDataFrame(block, fieldSchema)
-		blockDataframe.registerTempTable("window_test")
-		val monthlyTest = sqlContext.sql("select avg(double(Sales)) monthlyAvgSales, percentile(int(Sales), 0.5) monthlyMedSales, date_add(to_date(max(Date)), 30) Date, Store from windows_test group by Store")
-		monthlyTest.registerTempTable("monthly_test")
-		val testFull = sqlContext.sql(""" Select
-			double(a.Sales) label, double(a.Store) Store, double(a.Open) Open, double(a.Promo) Promo, double(a.StateHoliday) StateHoliday, double(a.SchoolHoliday) SchoolHoliday, double(dayofmonth(a.Date))  DayOfMonth, double(a.DayofWeek) DayOfWeek, double(month(a.Date)) Month, double(quarter(a.Date))  Quarter, double(year(a.Date)) Year, b.StoreType, b.Assortment, double(b.CompetitionDistance)  CompetitionDistance, double(b.CompetitionOpenSinceMonth) CompetitionOpenSinceMonth, double(b.  CompetitionOpenSinceYear) CompetitionOpenSinceYear, double(b.Promo2) as Promo2, double(b.Promo2SinceWeek) as Promo2SinceWeek, double(b.Promo2SinceYear) as Promo2SinceYear, b.PromoInterval,  to_date(a.Date) Date, c.monthlyAvgSales, c.monthlyMedSales
-			from monthly_test t1
-			left join train_full t2
-			on t1.Date = t2.Date and t1.Store = t2.Store""")
-		val rfOut = rfModel.transform(testFull)
-			.withColumnRenamed("prediction","Sales")
-			.select("Sales", "Date", "Store")
-		savePrediction(rfOut)
-		}
-	})
-	}
-*/
 }

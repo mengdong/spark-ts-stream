@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 #ppath="$1"
 #if [ ! -n "$ppath" ] ; then
@@ -8,6 +9,6 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export MASTER="yarn-client"
 
-/opt/mapr/spark/spark-1.5.2/bin/spark-submit --num-executors 3 --driver-memory 2g --executor-memory 2g --executor-cores 2 \
-    --packages com.databricks:spark-csv_2.10:1.4.0 \
-    --class "Regression" ${DIR}/target/scala-2.10/simple-ts-stream_2.10-1.0.jar /user/mapr/rossmann/train.csv /user/mapr/rossmann/test.csv
+/opt/mapr/spark/spark-2.0.1/bin/spark-submit \
+    --class "com.maprps.simpletsstream.RunTS" ${DIR}/target/scala-2.10/spark-ts-stream-assembly-0.1.0.jar --param1 "None"
+
