@@ -171,9 +171,12 @@ object RunTS extends Serializable {
                     .toLong.toString +" " + parts(l-1) + " SENSOR=sensor1 REGION=region1"
                 tsdbMetrics.toList
             } ).mapPartitions(OpenTSDB.toTSDB).collect
-            printf("------------------------")
-            printf(rdd.take(1).mkString(",") + "/n")
-            printf("------------------------")
+            printf("------------------------ \n")
+            printf(score.select("ts",
+                "ethylene", "r1", "r2", "r3", "r4",
+                "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12",
+                "r13", "r14", "r15", "r16", "prediction" ).take(1).mkString(",") + " \n")
+            printf("------------------------ \n")
         } )
 /*
         val numFeatures = 16
