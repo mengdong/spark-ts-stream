@@ -61,7 +61,7 @@ object RunTS extends Serializable {
         val tsSchema = List( "ethylene", "r1", "r2", "r3", "r4",
             "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12",
             "r13", "r14", "r15", "r16", "prediction")
-        val ssc = new StreamingContext(sc, Seconds(5))
+        val ssc = new StreamingContext(sc, Seconds(20))
         ssc.checkpoint("maprfs:///checkpoint/.")
 /*
         val trainingData = ssc.textFileStream("maprfs:///user/mapr/train").map( s => {
@@ -103,6 +103,7 @@ object RunTS extends Serializable {
         val lines = KafkaUtils.createDirectStream[String, String](ssc,
             LocationStrategies.PreferConsistent, consumerStrategy).map(_.value())
         // val trainingDataToTSDB = ssc.textFileStream("maprfs:///user/mapr/train")
+        val lrModel = LinearRegressionModel.load(modelLoc)
         lines.foreachRDD( rdd => {
             val spark = SparkSession.builder.config(rdd.sparkContext.getConf).getOrCreate()
             import spark.implicits._
@@ -150,7 +151,6 @@ object RunTS extends Serializable {
             )
 
             val output = assembler.transform(dataDf).cache()
-            val lrModel = LinearRegressionModel.load(modelLoc)
             val score = lrModel.transform(output.select("features", "ts",
                 "ethylene", "r1", "r2", "r3", "r4",
                 "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12",
