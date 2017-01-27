@@ -26,6 +26,12 @@ object RunTS extends Serializable {
         ))
         .setOutputCol("features")
 
+    case class TestData (ts: Double, ethylene: Double,
+                         r1: Double, r2: Double, r3: Double, r4: Double,
+                         r5: Double, r6: Double, r7: Double, r8: Double,
+                         r9: Double, r10: Double, r11: Double, r12: Double,
+                         r13: Double, r14: Double, r15: Double, r16: Double)
+
     def main(args: Array[String]): Unit = {
         Logger.getLogger("org").setLevel(Level.WARN)
         Logger.getLogger("akka").setLevel(Level.WARN)
@@ -100,10 +106,13 @@ object RunTS extends Serializable {
         lines.foreachRDD( rdd => {
             val spark = SparkSession.builder.config(rdd.sparkContext.getConf).getOrCreate()
             import spark.implicits._
-            val data = rdd.map(r => r.split(',')).toDF("ts",
-                "ethylene", "r1", "r2", "r3", "r4",
-                "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12",
-                "r13", "r14", "r15", "r16")
+            val data = rdd.map(r => r.split(','))
+                .map( a => TestData(a(0).toDouble, a(1).toDouble, a(2).toDouble,
+                    a(3).toDouble, a(4).toDouble, a(5).toDouble, a(6).toDouble,
+                    a(7).toDouble, a(8).toDouble, a(9).toDouble, a(10).toDouble,
+                    a(11).toDouble, a(12).toDouble, a(13).toDouble, a(14).toDouble,
+                    a(15).toDouble, a(16).toDouble, a(17).toDouble) )
+                .toDF()
             data.createOrReplaceTempView("dev")
             val dataDf = spark.sql(
                 """select t1.ts, t1.r1, t1.r2, t1.r3, t1.r4,
