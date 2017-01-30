@@ -169,7 +169,7 @@ object RunTS extends Serializable {
                         .toLong.toString +" " + parts(i) +" SENSOR=sensor1 REGION=region1"
                 }
                 tsdbMetrics += tsSchema(l-2) + " " + (parts(0).toDouble * 1000 + timeStamp )
-                    .toLong.toString +" " + exp(parts(l-1).toDouble - 0.05).toString + " SENSOR=sensor1 REGION=region1"
+                    .toLong.toString +" " + (exp(parts(l-1).toDouble) - 0.05).toString + " SENSOR=sensor1 REGION=region1"
                 tsdbMetrics.toList
             } ).mapPartitions(OpenTSDB.toTSDB).collect
             printf("------------------------ \n")
