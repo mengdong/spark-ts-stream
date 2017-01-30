@@ -52,7 +52,7 @@ object Regression{
 			.format("com.databricks.spark.csv").load(train)
 		data.createOrReplaceTempView("train")
 		val df = spark.sql(
-			"""select t2.ethylene as label, t1.r1, t1.r2, t1.r3, t1.r4,
+			"""select t2.ethylene as label, t1.ts, t1.r1, t1.r2, t1.r3, t1.r4,
             |t1.r5, t1.r6, t1.r7, t1.r8, t1.r9, t1.r10, t1.r11, t1.r12,
 			|t1.r13, t1.r14, t1.r15, t1.r16, t1.ethylene,
 			|t3.vr1, t3.vr2, t3.vr3, t3.vr4, t3.vr5, t3.vr6, t3.vr7,
@@ -66,7 +66,7 @@ object Regression{
       |  	from train
       |) t2 on (t1.ts = t2.ts_future)
       |inner join (
-      |		select floor(ts/60) as interval, variance(r1) as vr1, avg(r1) as ar1,
+      |		select floor(ts/20) as interval, variance(r1) as vr1, avg(r1) as ar1,
       |     variance(r2) as vr2, avg(r2) as ar2,
       |     variance(r3) as vr3, avg(r3) as ar3,
       |     variance(r4) as vr4, avg(r4) as ar4,
@@ -84,8 +84,8 @@ object Regression{
 	  |     variance(r16) as vr16, avg(r16) as ar16,
       |     variance(ethylene) as vethylene, avg(ethylene) as aethylene
       |  	from train
-      |   	group by floor(ts/60)
-      |) t3 on (floor(t1.ts/60) = t3.interval)
+      |   	group by floor(ts/20)
+      |) t3 on (floor(t1.ts/20) = t3.interval)
     """.stripMargin
 		)
 

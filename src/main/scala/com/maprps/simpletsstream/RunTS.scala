@@ -83,7 +83,7 @@ object RunTS extends Serializable {
         val brokers = "maprdemo:9092" // not needed for MapR Streams, needed for Kafka
         val groupId = "testgroup"
         val offsetReset = "earliest"
-        val pollTimeout = "5000"
+        // val pollTimeout = "5120"
         val topics = "/sample-stream:sensor1-region1"
         val topicSet = topics.split(",").toSet
 
@@ -164,10 +164,11 @@ object RunTS extends Serializable {
                 val l = parts.length
                 var tsdbMetrics = new ListBuffer[String]()
                 for ( i <- 1 to l-2) {
-                    tsdbMetrics += tsSchema(i-1) +" " +(parts(0).toDouble * 1000 + timeStamp )
+                    tsdbMetrics += tsSchema(i-1) +" " +
+                        ((parts(0).toDouble - 60) * 1000 + timeStamp )
                         .toLong.toString +" " + parts(i) +" SENSOR=sensor1 REGION=region1"
                 }
-                tsdbMetrics += tsSchema(l-2) + " " + ((parts(0).toDouble + 60) * 1000 + timeStamp )
+                tsdbMetrics += tsSchema(l-2) + " " + (parts(0).toDouble * 1000 + timeStamp )
                     .toLong.toString +" " + parts(l-1) + " SENSOR=sensor1 REGION=region1"
                 tsdbMetrics.toList
             } ).mapPartitions(OpenTSDB.toTSDB).collect
