@@ -83,7 +83,7 @@ object RunTS extends Serializable {
         val brokers = "maprdemo:9092" // not needed for MapR Streams, needed for Kafka
         val groupId = "testgroup"
         val offsetReset = "earliest"
-        // val pollTimeout = "5120"
+        val pollTimeout = "1024"
         val topics = "/sample-stream:sensor1-region1"
         val topicSet = topics.split(",").toSet
 
