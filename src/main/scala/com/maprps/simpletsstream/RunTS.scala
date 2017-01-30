@@ -159,7 +159,7 @@ object RunTS extends Serializable {
             score.select("ts",
                 "ethylene", "r1", "r2", "r3", "r4",
                 "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12",
-                "r13", "r14", "r15", "r16", "prediction" ).flatMap( s => {
+                "r13", "r14", "r15", "r16", "prediction", "label").flatMap( s => {
                 val parts: Seq[String] = s.toSeq.map(_.toString)
                 val l = parts.length
                 var tsdbMetrics = new ListBuffer[String]()
@@ -169,6 +169,8 @@ object RunTS extends Serializable {
                         .toLong.toString +" " + parts(i) +" SENSOR=sensor1 REGION=region1"
                 }
                 tsdbMetrics += tsSchema(l-2) + " " + (parts(0).toDouble * 1000 + timeStamp )
+                    .toLong.toString +" " + parts(l-2) + " SENSOR=sensor1 REGION=region1"
+                tsdbMetrics += "label" + " " + (parts(0).toDouble * 1000 + timeStamp )
                     .toLong.toString +" " + parts(l-1) + " SENSOR=sensor1 REGION=region1"
                 tsdbMetrics.toList
             } ).mapPartitions(OpenTSDB.toTSDB).collect
@@ -176,7 +178,7 @@ object RunTS extends Serializable {
             printf(score.select("ts",
                 "ethylene", "r1", "r2", "r3", "r4",
                 "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12",
-                "r13", "r14", "r15", "r16", "prediction" ).take(1).mkString(",") + " \n")
+                "r13", "r14", "r15", "r16", "prediction", "label" ).take(1).mkString(",") + " \n")
             printf("------------------------ \n")
         } )
 /*
