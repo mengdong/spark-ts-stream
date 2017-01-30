@@ -10,5 +10,6 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export MASTER="yarn-client"
 
 /opt/mapr/spark/spark-2.0.1/bin/spark-submit \
-    --class "com.maprps.simpletsstream.RunTS" ${DIR}/target/scala-2.10/spark-ts-stream-assembly-0.1.0.jar --param1 "None"
+    --class "com.maprps.simpletsstream.RunTS" ${DIR}/target/scala-2.11/spark-ts-stream-assembly-0.1.0.jar \
+    --modelLoc "/user/mapr/lr3.model"
 
