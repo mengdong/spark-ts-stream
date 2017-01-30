@@ -90,7 +90,7 @@ object Regression{
 		)
 
 		val lr = new LinearRegression()
-			.setMaxIter(10)
+			.setMaxIter(100)
 			.setRegParam(0.3)
 			.setElasticNetParam(0.8)
 		val output = assembler.transform(df).select("features", "label").cache()
