@@ -66,7 +66,7 @@ object Regression{
       |  	from train
       |) t2 on (t1.ts = t2.ts_future)
       |inner join (
-      |		select floor(ts/5) as interval, variance(r1) as vr1, avg(r1) as ar1,
+      |		select floor(ts/60) as interval, variance(r1) as vr1, avg(r1) as ar1,
       |     variance(r2) as vr2, avg(r2) as ar2,
       |     variance(r3) as vr3, avg(r3) as ar3,
       |     variance(r4) as vr4, avg(r4) as ar4,
@@ -84,8 +84,8 @@ object Regression{
 	  |     variance(r16) as vr16, avg(r16) as ar16,
       |     variance(ethylene) as vethylene, avg(ethylene) as aethylene
       |  	from train
-      |   	group by floor(ts/5)
-      |) t3 on (floor(t1.ts/5) = t3.interval)
+      |   	group by floor(ts/60)
+      |) t3 on (floor(t1.ts/60) = t3.interval)
     """.stripMargin
 		)
 
