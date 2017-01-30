@@ -52,7 +52,7 @@ object Regression{
 			.format("com.databricks.spark.csv").load(train)
 		data.createOrReplaceTempView("train")
 		val df = spark.sql(
-			"""select log(t2.ethylene + 0.05) as label, t1.ts, t1.r1, t1.r2, t1.r3, t1.r4,
+			"""select t2.ethylene as label, t1.ts, t1.r1, t1.r2, t1.r3, t1.r4,
             |t1.r5, t1.r6, t1.r7, t1.r8, t1.r9, t1.r10, t1.r11, t1.r12,
 			|t1.r13, t1.r14, t1.r15, t1.r16, t1.ethylene,
 			|t3.vr1, t3.vr2, t3.vr3, t3.vr4, t3.vr5, t3.vr6, t3.vr7,
@@ -62,7 +62,7 @@ object Regression{
       |t3.ar8, t3.ar9, t3.ar10, t3.ar11, t3.ar12,
 	  |t3.ar13, t3.ar14, t3.ar15, t3.ar16, t3.aethylene
       |from train t1 inner join (
-      |		select ts+60 as ts_future, ethylene
+      |		select ts-60 as ts_future, ethylene
       |  	from train
       |) t2 on (t1.ts = t2.ts_future)
       |inner join (
