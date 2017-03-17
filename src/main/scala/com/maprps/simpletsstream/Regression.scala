@@ -62,11 +62,11 @@ object Regression{
       |t3.ar8, t3.ar9, t3.ar10, t3.ar11, t3.ar12,
 	  |t3.ar13, t3.ar14, t3.ar15, t3.ar16, t3.aethylene
       |from train t1 inner join (
-      |		select ts-60 as ts_future, ethylene
+      |		select ts-5 as ts_future, ethylene
       |  	from train
       |) t2 on (t1.ts = t2.ts_future)
       |inner join (
-      |		select floor(ts/20) as interval, variance(r1) as vr1, avg(r1) as ar1,
+      |		select floor(ts/5) as interval, variance(r1) as vr1, avg(r1) as ar1,
       |     variance(r2) as vr2, avg(r2) as ar2,
       |     variance(r3) as vr3, avg(r3) as ar3,
       |     variance(r4) as vr4, avg(r4) as ar4,
@@ -84,8 +84,8 @@ object Regression{
 	  |     variance(r16) as vr16, avg(r16) as ar16,
       |     variance(ethylene) as vethylene, avg(ethylene) as aethylene
       |  	from train
-      |   	group by floor(ts/20)
-      |) t3 on (floor(t1.ts/20) = t3.interval)
+      |   	group by floor(ts/5)
+      |) t3 on (floor(t1.ts/5) = t3.interval)
     """.stripMargin
 		)
 

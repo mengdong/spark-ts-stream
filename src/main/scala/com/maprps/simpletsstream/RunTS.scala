@@ -61,7 +61,7 @@ object RunTS extends Serializable {
         val tsSchema = List( "ethylene", "r1", "r2", "r3", "r4",
             "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12",
             "r13", "r14", "r15", "r16", "prediction")
-        val ssc = new StreamingContext(sc, Seconds(20))
+        val ssc = new StreamingContext(sc, Seconds(5))
         ssc.checkpoint("maprfs:///checkpoint/.")
 /*
         val trainingData = ssc.textFileStream("maprfs:///user/mapr/train").map( s => {
@@ -159,26 +159,24 @@ object RunTS extends Serializable {
             score.select("ts",
                 "ethylene", "r1", "r2", "r3", "r4",
                 "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12",
-                "r13", "r14", "r15", "r16", "prediction", "label").flatMap( s => {
+                "r13", "r14", "r15", "r16", "prediction").flatMap( s => {
                 val parts: Seq[String] = s.toSeq.map(_.toString)
                 val l = parts.length
                 var tsdbMetrics = new ListBuffer[String]()
                 for ( i <- 1 to l-2) {
                     tsdbMetrics += tsSchema(i-1) +" " +
-                        ((parts(0).toDouble - 60) * 1000 + timeStamp )
+                        ((parts(0).toDouble - 5) * 1000 + timeStamp )
                         .toLong.toString +" " + parts(i) +" SENSOR=sensor1 REGION=region1"
                 }
                 tsdbMetrics += tsSchema(l-2) + " " + (parts(0).toDouble * 1000 + timeStamp )
                     .toLong.toString +" " + parts(l-2) + " SENSOR=sensor1 REGION=region1"
-                tsdbMetrics += "label" + " " + (parts(0).toDouble * 1000 + timeStamp )
-                    .toLong.toString +" " + parts(l-1) + " SENSOR=sensor1 REGION=region1"
                 tsdbMetrics.toList
             } ).mapPartitions(OpenTSDB.toTSDB).collect
             printf("------------------------ \n")
             printf(score.select("ts",
                 "ethylene", "r1", "r2", "r3", "r4",
                 "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12",
-                "r13", "r14", "r15", "r16", "prediction", "label" ).take(1).mkString(",") + " \n")
+                "r13", "r14", "r15", "r16", "prediction").take(1).mkString(",") + " \n")
             printf("------------------------ \n")
         } )
 /*
