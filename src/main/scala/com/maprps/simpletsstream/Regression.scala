@@ -3,16 +3,18 @@ package com.maprps.simpletsstream
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.ml.regression.LinearRegression
+import org.apache.spark.ml.classification.LogisticRegression
 import org.apache.spark.ml.feature.VectorAssembler
 import scopt.OptionParser
 
 object Regression{
 
-    case class runParams (train: String = null, resultPath: String = null)
+    case class runParams (train: String = null, regressionPath: String = null,
+						  classificationPath: String = null)
 
 	val assembler = new VectorAssembler()
 		.setInputCols(Array("r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9",
-			"r10", "r11", "r12", "r13", "r14", "r15", "r16", "ethylene",
+			"r10", "r11", "r12", "r13", "r14", "r15", "r16",
 			"vr1", "vr2", "vr3", "vr4", "vr5", "vr6", "vr7", "vr8", "vr9", "vr10",
 			"vr11", "vr12", "vr13", "vr14", "vr15", "vr16", "vethylene",
 			"ar1", "ar2", "ar3", "ar4", "ar5", "ar6", "ar7", "ar8", "ar9", "ar10",
@@ -35,24 +37,31 @@ object Regression{
                 .text("location of the training data")
                 .action((x, c) => c.copy(train = x))
                 .required()
-			opt[String]("resultPath")
+			opt[String]("regressionPath")
 			    .text("location of the model")
-			    .action((x, c) => c.copy(resultPath = x))
+			    .action((x, c) => c.copy(regressionPath = x))
+			    .required()
+	 		opt[String]("classificationPath")
+			    .text("location of the model")
+			    .action((x, c) => c.copy(classificationPath = x))
 			    .required()
         }
         parser.parse(args, defaultParam).map { params =>
-            run(spark, params.train, params.resultPath)
+            run(spark, params.train, params.regressionPath, params.classificationPath)
         } getOrElse {
             sys.exit(1)
         }
     }
 
-    def run(spark: SparkSession, train: String, resultPath: String): Unit = {
+    def run(spark: SparkSession, train: String, regressionPath: String,
+            classificationPath: String): Unit = {
 		val data = spark.read.option("header", "true").option("inferSchema", "true")
 			.format("com.databricks.spark.csv").load(train)
 		data.createOrReplaceTempView("train")
 		val df = spark.sql(
-			"""select t2.ethylene as label, t1.ts, t1.r1, t1.r2, t1.r3, t1.r4,
+			"""select t2.ethylene as label,
+            |case when t2.ethylene > 0.01 then 1 else 0 end as labelC,
+            |t1.ts, t1.r1, t1.r2, t1.r3, t1.r4,
             |t1.r5, t1.r6, t1.r7, t1.r8, t1.r9, t1.r10, t1.r11, t1.r12,
 			|t1.r13, t1.r14, t1.r15, t1.r16, t1.ethylene,
 			|t3.vr1, t3.vr2, t3.vr3, t3.vr4, t3.vr5, t3.vr6, t3.vr7,
@@ -95,8 +104,18 @@ object Regression{
 			.setElasticNetParam(0.8)
 		val output = assembler.transform(df).select("features", "label").cache()
 		val lrModel = lr.fit(output)
-		lrModel.save(resultPath)
-		printf(s"saving result to $resultPath")
+		lrModel.save(regressionPath)
+		printf(s"saving regression model to $regressionPath")
+/*
+        val lrC = new LogisticRegression()
+            .setMaxIter(100)
+            .setRegParam(0.3)
+            .setElasticNetParam(0.8)
+        val outputC = assembler.transform(df).select("features", "labelC").cache()
+        val lrCModel = lrC.fit(outputC)
+        lrCModel.save(classificationPath)
+        printf(s"saving classification model to $classificationPath")
+*/
 	}
 
 }

@@ -11,5 +11,5 @@ export MASTER="yarn-client"
 
 /opt/mapr/spark/spark-2.0.1/bin/spark-submit --master local[2] \
     --class "com.maprps.simpletsstream.Regression" ${DIR}/target/scala-2.11/spark-ts-stream-assembly-0.1.0.jar \
-    --train "/user/mapr/ethylene_methane_1m.csv" --resultPath "/user/mapr/lr3.model"
+    --train "/user/mapr/ethylene_methane_1m.csv" --regressionPath "/user/mapr/lr.model" --classificationPath "/user/mapr/log.model"
 

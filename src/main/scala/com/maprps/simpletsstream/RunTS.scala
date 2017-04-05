@@ -11,14 +11,16 @@ import org.apache.spark.streaming.kafka09.{ConsumerStrategies, KafkaUtils, Locat
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.ml.regression.LinearRegressionModel
+import org.apache.spark.ml.classification.LogisticRegressionModel
+import org.apache.spark.ml.linalg.DenseVector
 import scala.math._
 
 object RunTS extends Serializable {
 
-    case class runParams (modelLoc: String = null)
+    case class runParams (rModelLoc: String = null, cModelLoc: String = null)
     val assembler = new VectorAssembler()
         .setInputCols(Array("r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9",
-            "r10", "r11", "r12", "r13", "r14", "r15", "r16", "ethylene",
+            "r10", "r11", "r12", "r13", "r14", "r15", "r16",
             "vr1", "vr2", "vr3", "vr4", "vr5", "vr6", "vr7", "vr8", "vr9", "vr10",
             "vr11", "vr12", "vr13", "vr14", "vr15", "vr16", "vethylene",
             "ar1", "ar2", "ar3", "ar4", "ar5", "ar6", "ar7", "ar8", "ar9", "ar10",
@@ -32,6 +34,10 @@ object RunTS extends Serializable {
                          r9: Double, r10: Double, r11: Double, r12: Double,
                          r13: Double, r14: Double, r15: Double, r16: Double)
 
+    def innerProduct (x : Array[Double], y : Array[Double]) : Double = {
+        x.zip(y).map(e => e._1 * e._2).sum
+    }
+
     def main(args: Array[String]): Unit = {
         Logger.getLogger("org").setLevel(Level.WARN)
         Logger.getLogger("akka").setLevel(Level.WARN)
@@ -44,20 +50,24 @@ object RunTS extends Serializable {
         val defaultParam = new runParams()
         val parser = new OptionParser[runParams](this.getClass.getSimpleName) {
             head(s"${this.getClass.getSimpleName}: Run simple app")
-            opt[String]("modelLoc")
+            opt[String]("rModelLoc")
               .text("input the model location")
-              .action((x, c) => c.copy(modelLoc = x))
+              .action((x, c) => c.copy(rModelLoc = x))
               .required()
+            opt[String]("cModelLoc")
+                .text("input the model location")
+                .action((x, c) => c.copy(cModelLoc = x))
+                .required()
         }
         parser.parse(args, defaultParam).map { params =>
-            run(sc, params.modelLoc)
+            run(sc, params.rModelLoc, params.cModelLoc)
         } getOrElse {
             sys.exit(1)
         }
         // sc.stop()
     }
 
-    def run(sc: SparkContext, modelLoc: String): Unit = {
+    def run(sc: SparkContext, rModelLoc: String, cModelLoc: String): Unit = {
         val tsSchema = List( "ethylene", "r1", "r2", "r3", "r4",
             "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12",
             "r13", "r14", "r15", "r16", "prediction")
@@ -80,7 +90,7 @@ object RunTS extends Serializable {
             LabeledPoint(label, features)
         })
 */
-        val brokers = "maprdemo:9092" // not needed for MapR Streams, needed for Kafka
+        val brokers = "demo.mapr.io:9092" // not needed for MapR Streams, needed for Kafka
         val groupId = "testgroup"
         val offsetReset = "earliest"
         val pollTimeout = "1024"
@@ -103,7 +113,8 @@ object RunTS extends Serializable {
         val lines = KafkaUtils.createDirectStream[String, String](ssc,
             LocationStrategies.PreferConsistent, consumerStrategy).map(_.value())
         // val trainingDataToTSDB = ssc.textFileStream("maprfs:///user/mapr/train")
-        val lrModel = LinearRegressionModel.load(modelLoc)
+        val lrModel = LinearRegressionModel.load(rModelLoc)
+        // val lrCModel = LogisticRegressionModel.load(cModelLoc)
         lines.foreachRDD( rdd => {
             val spark = SparkSession.builder.config(rdd.sparkContext.getConf).getOrCreate()
             import spark.implicits._
@@ -151,10 +162,16 @@ object RunTS extends Serializable {
             )
 
             val output = assembler.transform(dataDf).cache()
+
+            // val score = output.map(r => r.getAs[DenseVector]("features"))
+
             val score = lrModel.transform(output.select("features", "ts",
                 "ethylene", "r1", "r2", "r3", "r4",
                 "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12",
                 "r13", "r14", "r15", "r16" ))
+
+            // val score2 = lrCModel.transform(output.select("features", "ts"))
+
 
             score.select("ts",
                 "ethylene", "r1", "r2", "r3", "r4",
