@@ -44,6 +44,7 @@ object RunTS extends Serializable {
 
         val conf = new SparkConf().setAppName(this.getClass.getSimpleName)
         conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        conf.set("spark.streaming.stopGracefullyOnShutdown", "true")
         // conf.registerKryoClasses(Array(classOf[class1], classOf[class2]))
         val sc = new SparkContext(conf)
 
